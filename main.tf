@@ -15,7 +15,7 @@ terraform {
   backend "s3" {
     bucket         = "berry-white" # Name of your existing state bucket
     key            = "states/s3-app/terraform.tfstate"
-    region         = "ap-southeast-2"
+    region         = "us-east-1"
     encrypt        = true
     dynamodb_table = "tofu-state-lock" # Optional: Used for state locking
   }
