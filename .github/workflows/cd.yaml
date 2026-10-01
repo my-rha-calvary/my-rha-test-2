@@ -1,4 +1,3 @@
-# .github/workflows/tofu-cd.yml
 name: "OpenTofu CD"
 
 on:
@@ -18,7 +17,6 @@ jobs:
     # Runs only if manually dispatched or if CI was 100% green on main
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    environment: ${{ matrix.environment }} # Gates prod with manual approval if set in Repo Settings
     concurrency:
       group: tofu-cd-${{ matrix.environment }}
       cancel-in-progress: false

@@ -16,7 +16,7 @@ jobs:
   plan:
     name: "Plan [${{ matrix.environment }}]"
     runs-on: ubuntu-latest
-    environment: ${{ matrix.environment }}
+    # environment: ${{ matrix.environment }}
     concurrency:
       group: tofu-ci-${{ matrix.environment }}-${{ github.ref }}
       cancel-in-progress: false
@@ -41,5 +41,5 @@ jobs:
       - name: Execute Plan via Action
         uses: ./.github/actions/tofu-exec
         with:
-          # environment: ${{ matrix.environment }}
+          environment: ${{ matrix.environment }}
           command: plan
