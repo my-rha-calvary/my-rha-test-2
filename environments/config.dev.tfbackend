@@ -1,0 +1,5 @@
+bucket         = "berry-white"
+key            = "states/dev/terraform.tfstate"
+region         = "ap-southeast-2"
+encrypt        = true
+use_lockfile = true # Enables native S3 locking instead of DynamoDB
