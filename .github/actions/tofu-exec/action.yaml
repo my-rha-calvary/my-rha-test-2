@@ -1,0 +1,58 @@
+# .github/actions/tofu-exec/action.yml
+name: "OpenTofu Execute"
+description: "Handles environment validation, OpenTofu init, and plan/apply commands"
+
+inputs:
+  environment:
+    description: "Target environment (e.g. dev, sit, uat, prod)"
+    required: true
+  command:
+    description: "Command to execute (plan or apply)"
+    required: true
+  tofu-version:
+    description: "OpenTofu version to install"
+    required: false
+    default: "1.12.3"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Verify Environment Definition
+      id: check
+      shell: bash
+      run: |
+        VARFILE="environments/${{ inputs.environment }}.tfvars"
+        if [ -f "$VARFILE" ]; then
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "ℹ️ '$VARFILE' does not exist. Skipping environment '${{ inputs.environment }}'."
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Setup OpenTofu
+      if: steps.check.outputs.exists == 'true'
+      uses: opentofu/setup-opentofu@v1
+      with:
+        tofu_version: ${{ inputs.tofu-version }}
+
+    - name: OpenTofu Init
+      if: steps.check.outputs.exists == 'true'
+      shell: bash
+      run: |
+        tofu init -input=false \
+          -backend-config="config.${{ inputs.environment }}.tfbackend"
+
+    - name: OpenTofu Plan
+      if: steps.check.outputs.exists == 'true' && inputs.command == 'plan'
+      shell: bash
+      run: |
+        tofu plan -no-color -input=false \
+          -var-file="environments/${{ inputs.environment }}.tfvars" \
+          -out="${{ inputs.environment }}.tfplan"
+
+    - name: OpenTofu Apply
+      if: steps.check.outputs.exists == 'true' && inputs.command == 'apply'
+      shell: bash
+      run: |
+        tofu apply -input=false -auto-approve \
+          -var-file="environments/${{ inputs.environment }}.tfvars"

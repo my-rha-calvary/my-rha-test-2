@@ -1,27 +1,47 @@
-name: CD Pipeline
+# .github/workflows/tofu-cd.yml
+name: "OpenTofu CD"
 
 on:
-  push:
-    branches: [ main ]
+  workflow_run:
+    workflows: ["OpenTofu CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  deploy:
-    name: Deploy to ${{ matrix.environment }}
+  apply:
+    name: "Apply [${{ matrix.environment }}]"
+    # Runs only if manually dispatched or if CI was 100% green on main
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-
+    environment: ${{ matrix.environment }} # Gates prod with manual approval if set in Repo Settings
+    concurrency:
+      group: tofu-cd-${{ matrix.environment }}
+      cancel-in-progress: false
     strategy:
-      max-parallel: 1
+      max-parallel: 1    
+      fail-fast: true    
       matrix:
-        environment: [nonprod, prod]
-
+        environment: [dev, sit, prod]
+    
     environment: ${{ matrix.environment }}
-
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
-      - name: Multi-Env Deployment Execution
-        run: |
-          echo "Executing deployment pipeline"
-          echo "Current Target Environment: ${{{{ matrix.environment }}}}"
-          echo "Deployment initiated successfully!"
+      - name: Configure AWS Credentials via Static Secrets
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-2
+
+      - name: Execute Apply via Action
+        uses: ./.github/actions/tofu-exec
+        with:
+          environment: ${{ matrix.environment }}
+          command: apply
