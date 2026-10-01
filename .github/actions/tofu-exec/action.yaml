@@ -40,7 +40,7 @@ runs:
       shell: bash
       run: |
         tofu init -input=false \
-          -backend-config="config.${{ inputs.environment }}.tfbackend"
+          -backend-config="environments/config.${{ inputs.environment }}.tfbackend"
 
     - name: OpenTofu Plan
       if: steps.check.outputs.exists == 'true' && inputs.command == 'plan'
