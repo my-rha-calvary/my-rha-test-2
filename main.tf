@@ -13,11 +13,6 @@ terraform {
   # 2. Remote Backend Section
   # Stores the state file securely in an S3 bucket instead of local disk
   backend "s3" {
-    bucket         = "berry-white" # Name of your existing state bucket
-    key            = "states/s3-app/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "tofu-state-lock" # Optional: Used for state locking
   }
 }
 
