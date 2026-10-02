@@ -24,7 +24,7 @@ variable "environment" {
 resource "aws_s3_bucket" "app_bucket" {
   # Globally unique bucket name combined with your environment variable
   bucket = "my-app-${var.environment}-bucket"
-
+  region = "us-east-1"
   tags = {
     Name        = "App Bucket"
     Environment = var.environment
