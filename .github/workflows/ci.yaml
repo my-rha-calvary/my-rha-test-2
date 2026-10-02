@@ -30,6 +30,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v6
 
+      - name: Configure AWS Credentials via Static Secrets
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
       - name: Execute Plan via Action
         uses: ./.github/actions/tofu-exec
         with:
